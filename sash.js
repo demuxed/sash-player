@@ -32,8 +32,16 @@
             // Cache the buffer
             this.mediaBuffer.push(result);
 
-            if (!this.sourceBuffer.updating) {
+            if (this.currentSegment === 0) {
                 this.loadBufferIntoMSE();
+            }
+
+            // TODO: This shouldn't even be in here - Chrome seems to be inconsistent about how it fires 'updateend'
+            // events from inside MSE, so we don't rely on that chaining in Chrome.
+            if (Boolean(window.chrome)) {
+                if (!this.sourceBuffer.updating) {
+                    this.loadBufferIntoMSE();
+                }
             }
 
             this.currentSegment++;
@@ -45,8 +53,14 @@
     }
 
     Track.prototype.loadBufferIntoMSE = function() {
+        console.log('loadBufferintoMSECalled for ' + this.currentSegment  + ' ' + this.codecString);
         if (this.mediaBuffer.length) {
-            this.sourceBuffer.appendBuffer(this.mediaBuffer.shift());
+            try {
+                this.sourceBuffer.appendBuffer(this.mediaBuffer.shift());
+            }
+            catch (err) {
+                console.log('Could not load buffer into MSE.')
+            }
         }
     }
 
@@ -69,7 +83,6 @@
                 var codecString = manifest.adaptation_sets[i].mime_type + '; codecs="' + manifest.adaptation_sets[i].representations[repid].codecs + '"';
                 var segments = [manifest.adaptation_sets[i].segment_template.init.replace('$representation$', repid)];
                 for (k = manifest.adaptation_sets[i].segment_template.start_number; k <= manifest.adaptation_sets[i].segment_template.end_number; k++) {
-                    console.log(manifest.adaptation_sets[i].segment_template.media.replace('$representation$', repid).replace('$number$', k));
                     segments.push(manifest.adaptation_sets[i].segment_template.media.replace('$representation$', repid).replace('$number$', k));
                 }
                 new Track(mediaSource, codecString, segments);
@@ -78,9 +91,8 @@
 
         // Only init MSE once the manifest is loaded.
         player.src = window.URL.createObjectURL(mediaSource);
+        setTimeout(function(){ player.play() }, 1000);
 
     });
-
-
 
 }())
