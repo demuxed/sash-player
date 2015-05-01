@@ -47,15 +47,15 @@
                     this.sourceBuffer.appendBuffer(this.mediaBuffer.shift());
                 }
                 else {
-                    console.log("The buffer was already in use.")
+                    console.log("MSE buffer currently updating.")
                 }
             }
             catch (err) {
-                console.log('Could not load buffer into MSE.')
+                console.log('Error when loading buffer into MSE.')
             }
         }
         else {
-            console.log('No buffers populated & ready to use. Try again later!')
+            console.log('No buffers ready to load into MSE.')
         }
     }
 
