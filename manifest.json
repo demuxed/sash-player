@@ -9,7 +9,7 @@
                 "init": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/init.m4f",
                 "media": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/segment$number$.m4f",
                 "start_number": 1,
-                "end_number" : 103
+                "end_number" : 368
             },
             "representations" : {
                 "video-480p" : {
@@ -28,7 +28,7 @@
                 "init": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/init.m4f",
                 "media": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/segment$number$.m4f",
                 "start_number": 1,
-                "end_number": 104
+                "end_number": 368
             },
             "representations": {
                 "audio-64k" : {

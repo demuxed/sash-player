@@ -60,23 +60,26 @@
     var mediaSource = new MediaSource();
     var player = document.querySelector('#player');
 
-    // Instantiate each track and addd it to MSE
-    var audioTrack = new Track(mediaSource, 'audio/mp4; codecs="mp4a.40.2"', [
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/audio-64k/init.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/audio-64k/segment1.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/audio-64k/segment2.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/audio-64k/segment3.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/audio-64k/segment4.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/audio-64k/segment5.m4f']);
+    // TODO: This is a bad implementation of a SASH manifest reader.
+    $.getJSON( "manifest.json", function( manifest ) {
+        for (i = 0; i < manifest.adaptation_sets.length; i++) {
+            for (j = 0; j < Object.keys(manifest.adaptation_sets[i].representations).length; j++) {
+                repid = Object.keys(manifest.adaptation_sets[i].representations)[j];
+                var codecString = manifest.adaptation_sets[i].mime_type + '; codecs="' + manifest.adaptation_sets[i].representations[repid].codecs + '"';
+                var segments = [manifest.adaptation_sets[i].segment_template.init.replace('$representation$', repid)];
+                for (k = manifest.adaptation_sets[i].segment_template.start_number; k <= manifest.adaptation_sets[i].segment_template.end_number; k++) {
+                    console.log(manifest.adaptation_sets[i].segment_template.media.replace('$representation$', repid).replace('$number$', k));
+                    segments.push(manifest.adaptation_sets[i].segment_template.media.replace('$representation$', repid).replace('$number$', k));
+                }
+                new Track(mediaSource, codecString, segments);
+            }
+        }
 
-    var videoTrack = new Track(mediaSource, 'video/mp4; codecs="avc1.4d401e"', [
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/video-480p/init.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/video-480p/segment1.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/video-480p/segment2.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/video-480p/segment3.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/video-480p/segment4.m4f',
-        'http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/video-480p/segment5.m4f']);
+        // Only init MSE once the manifest is loaded.
+        player.src = window.URL.createObjectURL(mediaSource);
 
-    player.src = window.URL.createObjectURL(mediaSource);
+    });
+
+
 
 }())
