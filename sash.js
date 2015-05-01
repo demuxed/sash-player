@@ -14,6 +14,10 @@
         request.send();
     }
 
+    // TODO: 1) Limit the number of the buffers we hold in memory if MSE is slow to consume them
+    //       2) Stop downloading segments when we've got a sensible numbers buffered
+    //       3) Support scrubbing
+
     // Track prototype
     function Track(mediaSource, codecString, segments) {
         this.mediaBuffer = [];
