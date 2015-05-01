@@ -1,0 +1,41 @@
+{
+    "version" : 1,
+    "duration": 300,
+    "adaptation_sets" : [
+        {
+            "mime_type" : "video/mp4",
+            "segment_template" : {
+                "duration": 1.960,
+                "init": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/init.m4f",
+                "media": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/segment$number$.m4f",
+                "start_number": 1,
+                "end_number" : 103
+            },
+            "representations" : {
+                "video-480p" : {
+                    "bandwidth": 800000,
+                    "codecs": "avc1.4d401e",
+                    "height": 480,
+                    "width": 852
+                }
+            }
+        },
+        {
+            "language" : "en",
+            "mime_type" : "audio/mp4",
+            "segment_template": {
+                "duration": 1.996,
+                "init": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/init.m4f",
+                "media": "http://s3-us-west-2.amazonaws.com/mpag-sash/media/tos/dash/$representation$/segment$number$.m4f",
+                "start_number": 1,
+                "end_number": 104
+            },
+            "representations": {
+                "audio-64k" : {
+                    "bandwidth": 64000,
+                    "codecs": "mp4a.40.2"
+                }
+            }
+        }
+    ]
+}
