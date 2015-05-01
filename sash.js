@@ -60,7 +60,8 @@
     var mediaSource = new MediaSource();
     var player = document.querySelector('#player');
 
-    // TODO: This is a bad implementation of a SASH manifest reader.
+    // TODO: This is a bad implementation of a SASH manifest reader. Clean it up & modularise.
+    // TODO: Since this will become a module, also using jquery is a little lazy
     $.getJSON( "manifest.json", function( manifest ) {
         for (i = 0; i < manifest.adaptation_sets.length; i++) {
             for (j = 0; j < Object.keys(manifest.adaptation_sets[i].representations).length; j++) {
