@@ -29,20 +29,8 @@
     Track.prototype.getNextSegment = function() {
         get(this.segments[this.currentSegment], function(err, result) {
 
-            // Cache the buffer
             this.mediaBuffer.push(result);
-
-            if (this.currentSegment === 0) {
-                this.loadBufferIntoMSE();
-            }
-
-            // TODO: This shouldn't even be in here - Chrome seems to be inconsistent about how it fires 'updateend'
-            // events from inside MSE, so we don't rely on that chaining in Chrome.
-            if (Boolean(window.chrome)) {
-                if (!this.sourceBuffer.updating) {
-                    this.loadBufferIntoMSE();
-                }
-            }
+            this.loadBufferIntoMSE();
 
             this.currentSegment++;
             if (this.currentSegment < this.segments.length) {
@@ -53,20 +41,27 @@
     }
 
     Track.prototype.loadBufferIntoMSE = function() {
-        console.log('loadBufferintoMSECalled for ' + this.currentSegment  + ' ' + this.codecString);
         if (this.mediaBuffer.length) {
             try {
-                this.sourceBuffer.appendBuffer(this.mediaBuffer.shift());
+                if (!this.sourceBuffer.updating) {
+                    this.sourceBuffer.appendBuffer(this.mediaBuffer.shift());
+                }
+                else {
+                    console.log("The buffer was already in use.")
+                }
             }
             catch (err) {
                 console.log('Could not load buffer into MSE.')
             }
         }
+        else {
+            console.log('No buffers populated & ready to use. Try again later!')
+        }
     }
 
     Track.prototype.sourceOpenCallback = function() {
         this.sourceBuffer = this.mediaSource.addSourceBuffer(this.codecString);
-        this.sourceBuffer.addEventListener('updateend', this.loadBufferIntoMSE.bind(this), false);
+        this.sourceBuffer.addEventListener('update', this.loadBufferIntoMSE.bind(this), false);
         this.getNextSegment();
     }
 
