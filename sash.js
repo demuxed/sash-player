@@ -15,8 +15,8 @@
     }
 
     // TODO: 1) Limit the number of the buffers we hold in memory if MSE is slow to consume them
-    //       2) Stop downloading segments when we've got a sensible numbers buffered
-    //       3) Support scrubbing
+    //       2) Stop downloading segments when we've got a sensible number buffered (Or even better a configurable duration...)
+    //       3) Support scrubbing to un-buffered points in the content
 
     // Track prototype
     function Track(mediaSource, codecString, segments) {
@@ -73,20 +73,19 @@
     var mediaSource = new MediaSource();
     var player = document.querySelector('#player');
 
-    // TODO: This is a bad implementation of a SASH manifest reader. Clean it up & modularise.
-    // TODO: Since this will become a module, also using jquery is a little lazy
-    $.getJSON( "manifest.json", function( manifest ) {
-        for (i = 0; i < manifest.adaptation_sets.length; i++) {
-            for (j = 0; j < Object.keys(manifest.adaptation_sets[i].representations).length; j++) {
-                repid = Object.keys(manifest.adaptation_sets[i].representations)[j];
-                var codecString = manifest.adaptation_sets[i].mime_type + '; codecs="' + manifest.adaptation_sets[i].representations[repid].codecs + '"';
-                var segments = [manifest.adaptation_sets[i].segment_template.init.replace('$representation$', repid)];
-                for (k = manifest.adaptation_sets[i].segment_template.start_number; k <= manifest.adaptation_sets[i].segment_template.end_number; k++) {
-                    segments.push(manifest.adaptation_sets[i].segment_template.media.replace('$representation$', repid).replace('$number$', k));
-                }
-                new Track(mediaSource, codecString, segments);
+    $.getJSON( "0.2.json", function( manifest ) {
+
+        // Grab the first Audio and Video renditions we find, and push them onto MSE
+        ['video', 'audio'].forEach(function(element) {
+            firstRenditionName = Object.keys(manifest[element][0].renditions)[0];
+            firstRendition = manifest[element][0].renditions[firstRenditionName];
+            var codecString = manifest[element][0].mime_type + '; codecs="' + firstRendition.codecs + '"';
+            var segments = [manifest[element][0].segment_template.init.replace('$rendition$', firstRenditionName)];
+            for (k = manifest[element][0].segment_template.start_number; k <= manifest[element][0].segment_template.end_number; k++) {
+                segments.push(manifest[element][0].segment_template.media.replace('$rendition$', firstRenditionName).replace('$number$', k));
             }
-        }
+            new Track(mediaSource, codecString, segments);
+        });
 
         // Only init MSE once the manifest is loaded.
         player.src = window.URL.createObjectURL(mediaSource);
